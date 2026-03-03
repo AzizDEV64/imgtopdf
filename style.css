@@ -892,6 +892,27 @@ body {
     z-index: 1;
 }
 
+.footer-link {
+    margin-top: 8px;
+}
+
+.footer-link a {
+    color: var(--text-muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition-fast);
+}
+
+.footer-link a:hover {
+    color: var(--accent);
+}
+
+.footer-link svg {
+    vertical-align: middle;
+}
+
 /* --- Animations --- */
 @keyframes fadeInUp {
     from {

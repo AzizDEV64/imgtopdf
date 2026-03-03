@@ -85,12 +85,34 @@
         }
     }
 
-    // --- Image Reading ---
+    // --- Image Reading (with canvas normalization for cross-browser support) ---
     function readImageFile(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
             reader.onerror = reject;
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.naturalWidth;
+                        canvas.height = img.naturalHeight;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        // PNG files keep transparency, everything else → JPEG
+                        const isPng = file.type === 'image/png';
+                        const outputType = isPng ? 'image/png' : 'image/jpeg';
+                        const quality = isPng ? undefined : 0.92;
+                        const dataUrl = canvas.toDataURL(outputType, quality);
+                        resolve(dataUrl);
+                    } catch (err) {
+                        // Fallback to raw data URL if canvas fails
+                        resolve(e.target.result);
+                    }
+                };
+                img.onerror = () => resolve(e.target.result);
+                img.src = e.target.result;
+            };
             reader.readAsDataURL(file);
         });
     }
