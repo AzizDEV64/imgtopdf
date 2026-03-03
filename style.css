@@ -781,6 +781,21 @@ body {
     font-weight: 700;
 }
 
+/* --- Mobile PDF Actions --- */
+.mobile-pdf-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    animation: fadeInUp 0.3s ease;
+}
+
+.btn-mobile-action {
+    flex: 1;
+    justify-content: center;
+    padding: 14px 20px;
+    font-size: 0.95rem;
+}
+
 /* --- PDF Preview Modal --- */
 .pdf-preview-modal {
     position: fixed;

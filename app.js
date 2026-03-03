@@ -299,6 +299,33 @@
         showToast('Tüm fotoğraflar temizlendi', 'info');
     });
 
+    // --- Mobile Detection ---
+    function isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            || (window.innerWidth <= 768);
+    }
+
+    // --- Mobile PDF Actions ---
+    const mobilePdfActions = document.getElementById('mobile-pdf-actions');
+    const mobilePreviewBtn = document.getElementById('mobile-preview-btn');
+    const mobileDownloadBtn = document.getElementById('mobile-download-btn');
+    let mobilePdf = null;
+    let mobileFilename = '';
+    let mobileBlobUrl = null;
+
+    mobilePreviewBtn.addEventListener('click', () => {
+        if (mobileBlobUrl) {
+            window.open(mobileBlobUrl, '_blank');
+        }
+    });
+
+    mobileDownloadBtn.addEventListener('click', () => {
+        if (mobilePdf && mobileFilename) {
+            mobilePdf.save(mobileFilename);
+            showToast(`${mobileFilename} başarıyla indirildi!`, 'success');
+        }
+    });
+
     // --- PDF Preview Modal Refs ---
     const pdfPreviewModal = document.getElementById('pdf-preview-modal');
     const pdfPreviewIframe = document.getElementById('pdf-preview-iframe');
@@ -340,16 +367,8 @@
 
     pdfPreviewDownload.addEventListener('click', () => {
         if (currentPdf && currentFilename) {
-            // Use a temporary link to force correct filename
-            const blob = currentPdf.output('blob');
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = currentFilename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            // Use pdf.save() which handles cross-browser/mobile downloads reliably
+            currentPdf.save(currentFilename);
             showToast(`${currentFilename} başarıyla indirildi!`, 'success');
             closePdfPreview();
         }
@@ -384,7 +403,7 @@
             const A4_W = 210; // mm
             const A4_H = 297; // mm
             const PADDING = 3; // mm — padding on all 4 sides
-            const PAGE_NUM_AREA = 5; // mm — reserved at bottom for page number
+            const PAGE_NUM_AREA = 10; // mm — reserved at bottom for page number
 
             const usableW = A4_W - 2 * PADDING;
             const usableH = A4_H - 2 * PADDING - PAGE_NUM_AREA;
@@ -431,7 +450,7 @@
                 pdf.setFont('helvetica', 'normal');
                 pdf.setFontSize(10);
                 pdf.setTextColor(120, 120, 120);
-                const pageText = `${i + 1} / ${images.length}`;
+                const pageText = `Sayfa ${i + 1} / ${images.length}`;
                 const textWidth = pdf.getTextWidth(pageText);
                 pdf.text(pageText, (A4_W - textWidth) / 2, A4_H - PADDING);
 
@@ -439,13 +458,25 @@
                 await new Promise(r => setTimeout(r, 30));
             }
 
-            progressFill.style.width = '100%';
-            progressText.textContent = 'Önizleme hazır!';
-
             const filename = (filenameInput.value.trim() || 'lab_raporu') + '.pdf';
 
-            // Show preview instead of direct download
-            openPdfPreview(pdf, filename);
+            if (isMobile()) {
+                // Mobile: show action buttons (preview in new tab + download)
+                mobilePdf = pdf;
+                mobileFilename = filename;
+                const blob = pdf.output('blob');
+                if (mobileBlobUrl) URL.revokeObjectURL(mobileBlobUrl);
+                mobileBlobUrl = URL.createObjectURL(blob);
+
+                progressFill.style.width = '100%';
+                progressText.textContent = 'Hazır!';
+                mobilePdfActions.style.display = '';
+            } else {
+                // Desktop: show preview modal
+                progressFill.style.width = '100%';
+                progressText.textContent = 'Önizleme hazır!';
+                openPdfPreview(pdf, filename);
+            }
 
             setTimeout(() => {
                 progressContainer.style.display = 'none';
