@@ -73,5 +73,5 @@ MIT
 ---
 
 <p align="center">
-  <b>AzizDEV64</b> tarafından ❤️ ile yapıldı
+  <b>AzizDEV64</b> tarafından yapıldı
 </p>
