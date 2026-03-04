@@ -436,7 +436,7 @@
                 // Update progress
                 const pct = Math.round(((i + 1) / images.length) * 100);
                 progressFill.style.width = `${pct}%`;
-                progressText.textContent = `Sayfa ${i + 1} / ${images.length}`;
+                progressText.textContent = `${i + 1} / ${images.length}`;
 
                 // White background
                 pdf.setFillColor(255, 255, 255);
@@ -472,7 +472,7 @@
                 pdf.setFont('helvetica', 'normal');
                 pdf.setFontSize(10);
                 pdf.setTextColor(120, 120, 120);
-                const pageText = `Sayfa ${i + 1} / ${images.length}`;
+                const pageText = `${i + 1} / ${images.length}`;
                 const textWidth = pdf.getTextWidth(pageText);
                 pdf.text(pageText, (A4_W - textWidth) / 2, A4_H - PADDING);
 
